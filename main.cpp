@@ -18,15 +18,23 @@ Cavern* readCAV(char* path) {
 
 		while (std::getline(file, tok, ',')) {
 			if (i > (cavern->size * 2) && i <= (cavern->size * cavern->size)) {
+				/*if(col == 0)
+					cout << "\n";
+				else
+					cout << col;*/
 				cavern->connections[row][col] = std::stoi(tok);
+				col++;
+				if (col == cavern->size)
+					col = 0;
 			}
 			else if (i > 0 && i <= (cavern->size * 2)) {
 				cavern->coords[isY ? 1 : 0][col] = std::stoi(tok);
 				if (isY)
 					col++;
-				if (i == (cavern->size * 2) + 1)
+				if (i == (cavern->size * 2))
 					col = 0; //resets col for the connections declaration count
-				isY = !isY;
+				else
+					isY = !isY;
 			}
 			else if (i == 0) { //declares the Cavern object
 				cavern->size = std::stoi(tok);
@@ -35,7 +43,7 @@ Cavern* readCAV(char* path) {
 					cavern->coords[i] = new int[2];
 				cavern->connections = new int* [cavern->size];
 				for (int i = 0; i < cavern->size; i++)
-					cavern->coords[i] = new int[cavern->size];
+					cavern->connections[i] = new int[cavern->size];
 			}
 			i++;
 		}
@@ -53,6 +61,10 @@ Cavern* readCAV(char* path) {
 	///*for (int i = 0; i < cavern->size; i++)
 	//	cout << "(" << cavern->coords[0][i] << "," << cavern->coords[1][i] << "), ";
 	//std::cin.ignore();*/
+
+	/*for (int i = 0; i < cavern->size; i++)
+		for (int j = 0; j < cavern->size; j++)
+			cout << cavern->connections[i][j];*/
 	return cavern;
 }
 
