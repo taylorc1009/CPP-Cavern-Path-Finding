@@ -18,7 +18,10 @@ void freeCavern(Cavern* cavern) {
 }
 
 void readCAV(char* path, Cavern* cavern) {
-	ifstream file(path);
+	std::string str(path);
+	str.append(".cav");
+
+	ifstream file(str);
 
 	if (file.is_open()) {
 		std::string tok;
@@ -56,7 +59,7 @@ void readCAV(char* path, Cavern* cavern) {
 		}
 	}
 	else
-		cout << "(!) failed to open file: " << path;
+		cout << "(!) failed to open file: " << str;
 }
 
 int main(int argc, char **argv) {
