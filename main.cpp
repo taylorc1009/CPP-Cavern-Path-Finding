@@ -57,6 +57,7 @@ void readCAV(char* path, Cavern* cavern) {
 			}
 			i++;
 		}
+		file.close();
 	}
 	else
 		cout << "(!) failed to open file: " << str;
