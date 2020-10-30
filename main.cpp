@@ -7,17 +7,58 @@
 
 using namespace std;
 
-void freeCavern(Cavern* cavern) {
-	for (int i = 0; i < cavern->size; i++)
-		delete[] cavern->connections[i];
-	delete[] cavern->connections;
-	delete[] cavern->coords[0];
-	delete[] cavern->coords[1];
-	delete cavern->coords;
-	delete cavern;
+void freeCavern(vector<Cavern> &caverns) {
+	for (int i = 0; i < caverns.size(); i++)
+		delete caverns[i].connections;
+	delete &caverns;
 }
 
-void readCAV(char* path, Cavern* cavern) {
+void readCAV(char* path, vector<Cavern> &caverns) {
+	std::string str(path);
+	str.append(".cav");
+
+	ifstream file(str);
+
+	if (file.is_open()) {
+		std::string tok;
+		int i = 0, row = 0, col = 0, size = 0, temp = 0;
+		bool isY = false;
+
+		while (std::getline(file, tok, ',')) {
+			if (i > (size * 2) && i <= ((size * size) + (size * 2))) {
+				caverns[row].connections[col] = stoi(tok);
+				row++;
+				if (row == size) {
+					col++;
+					row = 0;
+				}
+			}
+			else if (i > 0 && i <= (size * 2)) {
+				if (isY) {
+					caverns.push_back(Cavern(temp, stoi(tok), size));
+					row++;
+				}
+				else
+					temp = stoi(tok);
+				if (i == (size * 2)) {
+					row = 0; //resets col for the connections declaration count
+				}
+				else
+					isY = !isY;
+			}
+			else if (i == 0) { //declares the Cavern object
+				size = stoi(tok);
+				caverns.reserve(size);
+			}
+			i++;
+		}
+		file.close();
+	}
+	else
+		cout << "(!) failed to open file: " << str;
+}
+
+/*void readCAV(char* path, Cavern* cavern) { // backup matrix storage system
 	std::string str(path);
 	str.append(".cav");
 
@@ -61,13 +102,17 @@ void readCAV(char* path, Cavern* cavern) {
 	}
 	else
 		cout << "(!) failed to open file: " << str;
-}
+}*/
 
 int main(int argc, char **argv) {
 	if (argc == 2) {
-		Cavern* cavern = new Cavern();
-		readCAV(argv[1], cavern);
-		freeCavern(cavern);
+		vector<Cavern>* caverns = new vector<Cavern>;
+		vector<Cavern>& reference = *caverns;
+		readCAV(argv[1], reference);
+		/*for (int i = 0; i < reference.size(); i++)
+			cout << reference[i].getX() << ", " << reference[i].getY() << "\n";*/
+		freeCavern(reference);
+		//cout << "done";
 	}
 	else
 		cout << "(!) invalid number of parameters";
