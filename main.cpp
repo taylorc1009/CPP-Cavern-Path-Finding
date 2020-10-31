@@ -2,18 +2,18 @@
 #include<fstream>
 #include<string>
 #include<sstream>
+#include<map>
+#include<algorithm>
 #include "math.h"
 #include "Cavern.h"
 
-using namespace std;
-
-void freeCavern(vector<Cavern> &caverns) {
+void freeCavern(std::vector<Cavern> &caverns) {
 	for (int i = 0; i < caverns.size(); i++) {
 		caverns[i].connections.clear();
-		caverns[i].connections.swap(vector<int>(caverns[i].connections));
+		caverns[i].connections.swap(std::vector<int>(caverns[i].connections));
 	}
 	caverns.clear();
-	caverns.swap(vector<Cavern>(caverns));
+	caverns.swap(std::vector<Cavern>(caverns));
 	delete &caverns;
 }
 
@@ -23,11 +23,11 @@ double EuclidianDistance(Cavern &current, Cavern &goal) {
 	return sqrt(x + y);
 }
 
-void readCAV(char* path, vector<Cavern> &caverns) {
+void readCAV(char* path, std::vector<Cavern> &caverns) {
 	std::string str(path);
 	str.append(".cav");
 
-	ifstream file(str);
+	std::ifstream file(str);
 
 	if (file.is_open()) {
 		std::string tok;
@@ -78,11 +78,34 @@ void readCAV(char* path, vector<Cavern> &caverns) {
 		delete cons;
 	}
 	else
-		cout << "(!) failed to open file: " << str;
+		std::cout << "(!) failed to open file: " << str;
 }
 
-void AStar(vector<Cavern>& caverns, int goal, double estDist) {
-	cout << estDist;
+void AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
+	std::vector<int> usedVec, openVec;
+	std::map<int, int> cameFrom;
+	std::map<int, double> gScore, fScore;
+	int currentCavern;
+
+	gScore[caverns[0].id] = 0;
+	fScore[caverns[0].id] = estDist;
+	openVec.push_back(caverns[0].id);
+
+	std::cout << "done";
+
+	while (openVec.size() > 0) {
+		double lowest = DBL_MAX;
+		for (std::map<int, double>::iterator i = fScore.begin(); i != fScore.end(); i++) {
+			if (i->second < lowest) {
+				lowest = i->second;
+				currentCavern = caverns[i->first].id;
+				//cout << lowest;
+			}
+		}
+		if (currentCavern == goal)
+			break;
+		openVec.erase(std::remove(openVec.begin(), openVec.end(), currentCavern), openVec.end());
+	}
 }
 
 /*void readCAV(char* path, Cavern* cavern) { // backup matrix storage system
@@ -133,8 +156,8 @@ void AStar(vector<Cavern>& caverns, int goal, double estDist) {
 
 int main(int argc, char **argv) {
 	if (argc == 2) {
-		vector<Cavern>* caverns = new vector<Cavern>;
-		vector<Cavern>& reference = *caverns;
+		std::vector<Cavern>* caverns = new std::vector<Cavern>;
+		std::vector<Cavern>& reference = *caverns;
 		readCAV(argv[1], reference);
 		/*for (int i = 0; i < reference.size(); i++) {
 			for (int j = 0; j < reference[i].connections.size(); j++)
@@ -146,6 +169,6 @@ int main(int argc, char **argv) {
 		//cout << "done";
 	}
 	else
-		cout << "(!) invalid number of parameters";
+		std::cout << "(!) invalid number of parameters";
 	return 0;
 }
