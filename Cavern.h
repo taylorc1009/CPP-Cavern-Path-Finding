@@ -1,15 +1,13 @@
 #pragma once
+#include<vector>
 
 class Cavern {
 public:
 	int id;
 	int x;
 	int y;
-	int* connections;
-	Cavern(int _x, int _y, int size) : x(_x), y(_y) {
-		this->connections = new int[size];
-	}
-	Cavern() = default;
+	std::vector<int> connections;
+	Cavern(int _id, int _x, int _y) : id(_id), x(_x), y(_y) {}
 	int getX() const { return x; }
 	int getY() const { return y; }
 };

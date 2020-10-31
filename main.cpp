@@ -1,15 +1,18 @@
 #include<iostream>
 #include<fstream>
 #include<string>
-#include <vector>
-#include <sstream>
+#include<sstream>
 #include "Cavern.h"
 
 using namespace std;
 
 void freeCavern(vector<Cavern> &caverns) {
-	for (int i = 0; i < caverns.size(); i++)
-		delete caverns[i].connections;
+	for (int i = 0; i < caverns.size(); i++) {
+		caverns[i].connections.clear();
+		caverns[i].connections.swap(vector<int>(caverns[i].connections));
+	}
+	caverns.clear();
+	caverns.swap(vector<Cavern>(caverns));
 	delete &caverns;
 }
 
@@ -22,20 +25,21 @@ void readCAV(char* path, vector<Cavern> &caverns) {
 	if (file.is_open()) {
 		std::string tok;
 		int i = 0, row = 0, col = 0, size = 0, temp = 0;
+		int** cons;
 		bool isY = false;
 
 		while (std::getline(file, tok, ',')) {
 			if (i > (size * 2) && i <= ((size * size) + (size * 2))) {
-				caverns[row].connections[col] = stoi(tok);
-				row++;
-				if (row == size) {
-					col++;
-					row = 0;
+				cons[row][col] = stoi(tok);
+				col++;
+				if (col == size) {
+					row++;
+					col = 0;
 				}
 			}
 			else if (i > 0 && i <= (size * 2)) {
 				if (isY) {
-					caverns.push_back(Cavern(temp, stoi(tok), size));
+					caverns.push_back(Cavern(row, temp, stoi(tok)));
 					row++;
 				}
 				else
@@ -49,10 +53,22 @@ void readCAV(char* path, vector<Cavern> &caverns) {
 			else if (i == 0) { //declares the Cavern object
 				size = stoi(tok);
 				caverns.reserve(size);
+				cons = new int* [size];
+				for (int j = 0; j < size; j++)
+					cons[j] = new int[size];
 			}
 			i++;
 		}
 		file.close();
+		
+		for (i = 0; i < size; i++)
+			for (int j = 0; j < size; j++)
+				if (cons[i][j] == 1)
+					//cout << j << "row: " << i << "\n";
+					caverns[j].connections.push_back(i);
+		for (i = 0; i < size; i++)
+			delete cons[i];
+		delete cons;
 	}
 	else
 		cout << "(!) failed to open file: " << str;
@@ -109,8 +125,11 @@ int main(int argc, char **argv) {
 		vector<Cavern>* caverns = new vector<Cavern>;
 		vector<Cavern>& reference = *caverns;
 		readCAV(argv[1], reference);
-		/*for (int i = 0; i < reference.size(); i++)
-			cout << reference[i].getX() << ", " << reference[i].getY() << "\n";*/
+		/*for (int i = 0; i < reference.size(); i++) {
+			for (int j = 0; j < reference[i].connections.size(); j++)
+				cout << reference[i].connections[j] << ",";
+			cout << "\n";
+		}*/
 		freeCavern(reference);
 		//cout << "done";
 	}
