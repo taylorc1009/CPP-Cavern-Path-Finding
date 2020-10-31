@@ -2,6 +2,7 @@
 #include<fstream>
 #include<string>
 #include<sstream>
+#include "math.h"
 #include "Cavern.h"
 
 using namespace std;
@@ -14,6 +15,12 @@ void freeCavern(vector<Cavern> &caverns) {
 	caverns.clear();
 	caverns.swap(vector<Cavern>(caverns));
 	delete &caverns;
+}
+
+double EuclidianDistance(Cavern &current, Cavern &goal) {
+	int x = pow((current.getX() + goal.getX()), 2);
+	int y = pow((current.getY() + goal.getY()), 2);
+	return sqrt(x + y);
 }
 
 void readCAV(char* path, vector<Cavern> &caverns) {
@@ -74,6 +81,10 @@ void readCAV(char* path, vector<Cavern> &caverns) {
 		cout << "(!) failed to open file: " << str;
 }
 
+void AStar(vector<Cavern>& caverns, int goal, double estDist) {
+	cout << estDist;
+}
+
 /*void readCAV(char* path, Cavern* cavern) { // backup matrix storage system
 	std::string str(path);
 	str.append(".cav");
@@ -130,6 +141,7 @@ int main(int argc, char **argv) {
 				cout << reference[i].connections[j] << ",";
 			cout << "\n";
 		}*/
+		AStar(reference, reference.size() - 1, EuclidianDistance(reference[0], reference[reference.size() - 1]));
 		freeCavern(reference);
 		//cout << "done";
 	}
