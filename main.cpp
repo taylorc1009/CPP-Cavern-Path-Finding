@@ -91,6 +91,21 @@ void readCAV(char* path, std::vector<Cavern> &caverns) {
 		std::cout << "(!) failed to open file: " << str;
 }
 
+int lowestDistance(std::vector<int> pendingCavs, std::map<int, double> fScore) {
+	int cav;
+	double lowest = DBL_MAX;
+	for (std::vector<int>::iterator unvisited = pendingCavs.begin(); unvisited != pendingCavs.end(); unvisited++) {
+		std::map<int, double>::iterator it = fScore.find(*unvisited);
+		if (it != fScore.end()) {
+			if (it->second < lowest) {
+				cav = it->first;
+				lowest = it->second;
+			}
+		}
+	}
+	return cav;
+}
+
 std::vector<int> reconstructPath(std::map<int, int> &cameFrom, int &currentCavern) {
 	std::vector<int> totalPath;
 	totalPath.push_back(currentCavern);
@@ -102,7 +117,7 @@ std::vector<int> reconstructPath(std::map<int, int> &cameFrom, int &currentCaver
 }
 
 std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
-	std::vector<int> usedVec, openVec;
+	std::vector<int> searchedCavs, pendingCavs;
 	std::map<int, int> cameFrom;
 	std::map<int, double> gScore, fScore;
 	int currentCavern;
@@ -110,21 +125,12 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 
 	gScore[0] = 0;
 	fScore[0] = estDist;
-	openVec.push_back(0);
+	pendingCavs.push_back(0);
 
-	while (openVec.size() > 0) {
-		double lowest = DBL_MAX;
+	while (pendingCavs.size() > 0) {
 
-		//looks for the cavern in the list of unsearched caverns with the lowest distance (in fScore)
-		for (std::vector<int>::iterator unvisited = openVec.begin(); unvisited != openVec.end(); unvisited++) {
-			std::map<int, double>::iterator it = fScore.find(*unvisited);
-			if (it != fScore.end()) {
-				if (it->second < lowest) {
-					currentCavern = it->first;
-					lowest = it->second;
-				}
-			}
-		}
+		//looks for the cavern in the list of perviously discovered caverns, pending search, with the lowest distance (in fScore)
+		currentCavern = lowestDistance(pendingCavs, fScore);
 
 		//exits the search if a result is found
 		if (currentCavern == goal) {
@@ -132,20 +138,20 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 			break;
 		}
 
-		//moves current subject cavern from the to the searched 
-		openVec.erase(std::remove(openVec.begin(), openVec.end(), currentCavern), openVec.end());
-		usedVec.push_back(currentCavern);
+		//removes current subject cavern from the pending cavs 
+		pendingCavs.erase(std::remove(pendingCavs.begin(), pendingCavs.end(), currentCavern), pendingCavs.end());
+		//adds the current subject to the searched cavs
+		searchedCavs.push_back(currentCavern);
 		
 		//for each connection of the current Cavern object in caverns[x].connections
 		for (std::vector<int>::const_iterator connection = caverns[currentCavern].getConnections().begin(); connection != caverns[currentCavern].getConnections().end(); connection++) {
-			//skip this check if the connection has been previously searched
-			if (contains(usedVec, *connection))
+			//skip this check if the connected path has been previously searched
+			if (contains(searchedCavs, *connection))
 				continue;
 
 			double gScoreTentative = gScore[currentCavern] + EuclidianDistance(caverns[currentCavern], caverns[*connection]);
-			//std::cout << "--" << gScoreTentative << " < " << gScore.find(*connection)->second << "? --";
-			if (!contains(openVec, *connection))
-				openVec.push_back(*connection);
+			if (!contains(pendingCavs, *connection))
+				pendingCavs.push_back(*connection);
 			else if (gScoreTentative >= gScore[*connection])
 				continue;
 			cameFrom[*connection] = currentCavern;
@@ -153,7 +159,6 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 			fScore[*connection] = gScore[*connection] + EuclidianDistance(caverns[*connection], caverns[goal]);
 		}
 	}
-	//std::cout << "\nfound = " << found;
 	if (found)
 		return reconstructPath(cameFrom, currentCavern);
 	else
