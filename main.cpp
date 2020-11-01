@@ -21,10 +21,8 @@ inline bool contains(const std::vector<A> &v, const typename identity<A>::type &
 }
 
 void freeCavern(std::vector<Cavern> &caverns) {
-	for (int i = 0; i < caverns.size(); i++) {
-		caverns[i].connections.clear();
-		caverns[i].connections.swap(std::vector<int>(caverns[i].connections));
-	}
+	/*for (int i = 0; i < caverns.size(); i++)
+		caverns[i].deleteConnections();*/
 	caverns.clear();
 	caverns.swap(std::vector<Cavern>(caverns));
 	delete &caverns;
@@ -58,19 +56,18 @@ void readCAV(char* path, std::vector<Cavern> &caverns) {
 				}
 			}
 			else if (i > 0 && i <= (size * 2)) {
-				if (isY) {
-					caverns.push_back(Cavern(row, temp, stoi(tok)));
-					row++;
-				}
+				if (isY)
+					/*caverns.push_back(Cavern(row, temp, stoi(tok)));
+					row++;*/
+					caverns.push_back(Cavern(temp, stoi(tok)));
 				else
 					temp = stoi(tok);
-				if (i == (size * 2)) {
-					row = 0; //resets col for the connections declaration count
-				}
-				else
+				/*if (i == (size * 2))
+					row = 0; //resets col count for the connections acquisition
+				else*/
 					isY = !isY;
 			}
-			else if (i == 0) { //declares the Cavern object
+			else if (i == 0) {
 				size = stoi(tok);
 				caverns.reserve(size);
 				cons = new int* [size];
@@ -84,8 +81,8 @@ void readCAV(char* path, std::vector<Cavern> &caverns) {
 		for (i = 0; i < size; i++)
 			for (int j = 0; j < size; j++)
 				if (cons[i][j] == 1)
-					//cout << j << "row: " << i << "\n";
-					caverns[j].connections.push_back(i);
+					caverns[j].addConnection(i);
+
 		for (i = 0; i < size; i++)
 			delete cons[i];
 		delete cons;
@@ -95,36 +92,12 @@ void readCAV(char* path, std::vector<Cavern> &caverns) {
 }
 
 std::vector<int> reconstructPath(std::map<int, int> &cameFrom, int &currentCavern) {
-	/*for (std::map<int, int>::iterator it = cameFrom.begin(); it != cameFrom.end(); it++)
-		std::cout << it->first << "," << it->second << "\n";*/
-
 	std::vector<int> totalPath;
 	totalPath.push_back(currentCavern);
-
-	/*for (std::vector<int>::iterator it = totalPath.begin(); it != totalPath.end(); it++)
-		std::cout << *it << "\n";*/
-
-	bool c = true;
 	while (containsKey(cameFrom, currentCavern)) {
-		/*std::cout << "i - ";
-		std::cout << cameFrom[0] << "\n";*/
-
-		/*std::map<int, int>::iterator it = cameFrom.find(currentCavern);
-
-		
-
-		if (it != cameFrom.end()) {*/
-			currentCavern = cameFrom[currentCavern];
-			totalPath.insert(totalPath.begin(), currentCavern);
-			//std::cout << currentCavern << "\n";
-		/*}
-		else
-			c = false;*/
+		currentCavern = cameFrom[currentCavern];
+		totalPath.insert(totalPath.begin(), currentCavern);
 	}
-	//std::reverse(totalPath.begin(), totalPath.end());
-	/*for (std::vector<int>::iterator i = totalPath.begin(); i != totalPath.end(); i++)
-		std::cout << *i << '\n';*/
-
 	return totalPath;
 }
 
@@ -135,67 +108,50 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 	int currentCavern;
 	bool found = false;
 
-	gScore[caverns[0].id] = 0;
-	fScore[caverns[0].id] = estDist;
-	openVec.push_back(caverns[0].id);
-
-	//std::cout << "done";
+	gScore[0] = 0;
+	fScore[0] = estDist;
+	openVec.push_back(0);
 
 	while (openVec.size() > 0) {
 		double lowest = DBL_MAX;
 
 		//looks for the cavern in the list of unsearched caverns with the lowest distance (in fScore)
 		for (std::vector<int>::iterator unvisited = openVec.begin(); unvisited != openVec.end(); unvisited++) {
-			/*for (std::map<int, double>::iterator cavern = fScore.begin(); cavern != fScore.end(); cavern++) {
-				if (*unvisited == cavern->first) {*/
 			std::map<int, double>::iterator it = fScore.find(*unvisited);
 			if (it != fScore.end()) {
 				if (it->second < lowest) {
+					currentCavern = it->first;
 					lowest = it->second;
-					currentCavern = it->first; // could be just i->first
-					//std::cout << lowest;
 				}
 			}
-				/*}
-			}*/
 		}
 
+		//exits the search if a result is found
 		if (currentCavern == goal) {
 			found = true;
 			break;
 		}
 
+		//moves current subject cavern from the to the searched 
 		openVec.erase(std::remove(openVec.begin(), openVec.end(), currentCavern), openVec.end());
 		usedVec.push_back(currentCavern);
 		
-		for (std::vector<int>::iterator neighbour = caverns[currentCavern].connections.begin(); neighbour != caverns[currentCavern].connections.end(); neighbour++) {
-			if (contains(usedVec, *neighbour))
+		//for each connection of the current Cavern object in caverns[x].connections
+		for (std::vector<int>::const_iterator connection = caverns[currentCavern].getConnections().begin(); connection != caverns[currentCavern].getConnections().end(); connection++) {
+			//skip this check if the connection has been previously searched
+			if (contains(usedVec, *connection))
 				continue;
 
-			//std::cout << *neighbour << '\n';
-
-			/*for (std::vector<int>::iterator i = usedVec.begin(); i != usedVec.end(); i++)
-				std::cout << *i;*/
-			//std::cout << '\n';
-
-			double gScoreTentative = gScore.find(currentCavern)->second + EuclidianDistance(caverns[currentCavern], caverns[*neighbour]);
-			//std::cout << "--" << gScoreTentative << " < " << gScore.find(*neighbour)->second << "? --";
-			if (!contains(openVec, *neighbour))
-				openVec.push_back(*neighbour);
-			else if (gScoreTentative >= gScore.find(*neighbour)->second)
+			double gScoreTentative = gScore[currentCavern] + EuclidianDistance(caverns[currentCavern], caverns[*connection]);
+			//std::cout << "--" << gScoreTentative << " < " << gScore.find(*connection)->second << "? --";
+			if (!contains(openVec, *connection))
+				openVec.push_back(*connection);
+			else if (gScoreTentative >= gScore[*connection])
 				continue;
-			cameFrom[*neighbour] = currentCavern;
-			gScore[*neighbour] = gScoreTentative;
-			fScore[*neighbour] = gScore.find(*neighbour)->second + EuclidianDistance(caverns[*neighbour], caverns[goal]);
-			/*if (gScoreTentative < gScore.find(*neighbour)->second) {
-				cameFrom[*neighbour] = currentCavern;
-				gScore[*neighbour] = gScoreTentative;
-				fScore[*neighbour] = gScore.find(*neighbour)->second + estDist;
-				if (!contains(openVec, *neighbour))
-					openVec.push_back(*neighbour);
-			}*/
+			cameFrom[*connection] = currentCavern;
+			gScore[*connection] = gScoreTentative;
+			fScore[*connection] = gScore[*connection] + EuclidianDistance(caverns[*connection], caverns[goal]);
 		}
-
 	}
 	//std::cout << "\nfound = " << found;
 	if (found)
@@ -209,11 +165,18 @@ int main(int argc, char **argv) {
 		std::vector<Cavern>* caverns = new std::vector<Cavern>;
 		std::vector<Cavern>& reference = *caverns;
 		readCAV(argv[1], reference);
-		/*for (int i = 0; i < reference.size(); i++) {
-			for (int j = 0; j < reference[i].connections.size(); j++)
-				cout << reference[i].connections[j] << ",";
-			cout << "\n";
-		}*/
+
+		/*std::cout << reference.size() << '\n';
+		for (int i = 0; i < reference.size(); i++)
+			std::cout << "(" << reference[i].getX() << "," << reference[i].getY() << ")\n";
+		for (int i = 0; i < reference.size(); i++) {
+			for (int j = 0; j < reference[i].getConnections().size(); j++)
+				std::cout << reference[i].getConnection(j) << ",";
+			std::cout << "\n";
+		}
+
+		std::cout << "\n\n --- A* --- \n\n";*/
+
 		std::vector<int> path = AStar(reference, reference.size() - 1, EuclidianDistance(reference[0], reference[reference.size() - 1]));
 		for (std::vector<int>::iterator i = path.begin(); i != path.end(); i++)
 			std::cout << *i << ' ';
