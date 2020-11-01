@@ -91,16 +91,25 @@ void AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 	fScore[caverns[0].id] = estDist;
 	openVec.push_back(caverns[0].id);
 
-	std::cout << "done";
+	//std::cout << "done";
 
 	while (openVec.size() > 0) {
 		double lowest = DBL_MAX;
-		for (std::map<int, double>::iterator i = fScore.begin(); i != fScore.end(); i++) {
-			if (i->second < lowest) {
-				lowest = i->second;
-				currentCavern = caverns[i->first].id;
-				//cout << lowest;
+
+		//looks for the cavern in the list of unsearched caverns with the lowest distance (in fScore)
+		for (std::vector<int>::iterator unvisited = openVec.begin(); unvisited != openVec.end(); unvisited++) {
+			//for (std::map<int, double>::iterator cavern = fScore.begin(); cavern != fScore.end(); cavern++) {
+				//if (*unvisited == cavern->first) {
+			std::map<int, double>::iterator it = fScore.find(*unvisited);
+			if (it != fScore.end()) {
+				if (it->second < lowest) {
+					lowest = it->second;
+					currentCavern = caverns[it->first].id; // could be just i->first
+					std::cout << lowest;
+				}
 			}
+				//}
+			//}
 		}
 		if (currentCavern == goal)
 			break;
