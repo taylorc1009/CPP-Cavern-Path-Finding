@@ -81,9 +81,10 @@ void readCAV(char* name, std::vector<Cavern> &caverns) {
 		std::cout << "(!) failed to open file: " << path;
 }
 
-int lowestDistance(std::vector<int> pendingCavs, std::map<int, double> fScore) { //returns the lowest estimated distance to the goal from each cavern in 'pendingCavs'
+int shortestDistance(std::vector<int> pendingCavs, std::map<int, double> fScore) { //returns the lowest estimated distance to the goal from each cavern in 'pendingCavs'
 	int cav;
 	double lowest = DBL_MAX;
+
 	for (std::vector<int>::iterator unvisited = pendingCavs.begin(); unvisited != pendingCavs.end(); unvisited++) { //for each unvisited cavern in 'pendingCavs'...
 		if(containsKey(fScore, *unvisited)) { //determine if we have an 'fScore' for it yet...
 			if (fScore[*unvisited] < lowest) { //if we do and its distance is lower than the current lowest, update lowest to the current cavern
@@ -92,22 +93,25 @@ int lowestDistance(std::vector<int> pendingCavs, std::map<int, double> fScore) {
 			}
 		}
 	}
+
 	return cav;
 }
 
 double EuclidianDistance(Cavern& current, Cavern& goal) {
-	int x = pow((goal.getX() - current.getX()), 2); //pow(x, 2) == x^2 - this isn't used in C++ for a number of reasons (https://stackoverflow.com/a/14627505/11136104)
-	int y = pow((goal.getY() - current.getY()), 2);
+	//pow(x, 2) is the same as x^2, but this isn't used in C++ for a number of reasons (https://stackoverflow.com/a/14627505/11136104)
+	int x = pow((goal.getX() - current.getX()), 2), y = pow((goal.getY() - current.getY()), 2);
 	return sqrt(x + y);
 }
 
 std::vector<int> reconstructPath(std::map<int, int> &cameFrom, int &currentCavern) { //rebuilds the final path to be in the order of traversal
 	std::vector<int> totalPath;
 	totalPath.push_back(currentCavern); //add the current cavern, which will be the goal, to the path
+
 	while (containsKey(cameFrom, currentCavern)) { //while 'cameFrom' contains any cavern preceeding the goal...
 		currentCavern = cameFrom[currentCavern]; //step back through the path to the previous connection to the current cavern...
 		totalPath.insert(totalPath.begin(), currentCavern); //then insert the previous connection to the start of the list
 	}
+
 	return totalPath;
 }
 
@@ -126,9 +130,9 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal) {
 	fScore[0] = EuclidianDistance(caverns[0], caverns[goal]);
 	pendingCavs.push_back(0);
 
-	while (pendingCavs.size() > 0) {
+	while (pendingCavs.size() > 0) { //keeps searching as long as we have a possible solution
 
-		currentCavern = lowestDistance(pendingCavs, fScore); //looks for the cavern in the list of perviously discovered caverns, pending search, with the lowest distance (in fScore)
+		currentCavern = shortestDistance(pendingCavs, fScore); //we will search along the path with the currently known shortest distance to the goal
 
 		if (currentCavern == goal) //exits the search returning the result, if it's found
 			return reconstructPath(cameFrom, currentCavern);
@@ -154,57 +158,39 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal) {
 			fScore[*connection] = gScore[*connection] + EuclidianDistance(caverns[*connection], caverns[goal]);
 		}
 	}
-
-	/*std::vector<int> v = reconstructPath(cameFrom, currentCavern);
-	int temp;
-	for (std::vector<int>::iterator i = v.begin(); i != v.end(); i++) {
-		if (*i != 0)
-			std::cout << temp + 1 << " -> " << *i + 1 << ": " << EuclidianDistance(caverns[temp], caverns[*i]) << "\n";
-		temp = *i;
-	}*/
-
 	return std::vector<int>(); //returns an empty vector to signify an inconclusive search - no path available
 }
 
 int main(int argc, char **argv) {
-	if (argc == 2) {
-		std::vector<Cavern>* caverns = new std::vector<Cavern>;
-		std::vector<Cavern>& reference = *caverns;
-		readCAV(argv[1], reference);
+	if (argc == 2) { //determines if we were given a file name
 
-		/*std::cout << reference.size() << '\n';
-		for (int i = 0; i < reference.size(); i++)
-			std::cout << "(" << reference[i].getX() << "," << reference[i].getY() << ")\n";
-		for (int i = 0; i < reference.size(); i++) {
-			for (int j = 0; j < reference[i].getConnections().size(); j++)
-				std::cout << reference[i].getConnection(j) << ",";
-			std::cout << "\n";
-		}*/
+		std::vector<Cavern>* caverns = new std::vector<Cavern>; //declares a vector of type 'Cavern' on the heap
+		std::vector<Cavern>& reference = *caverns; //declares a reference to said vector do we can pass a parameter of it by reference
 
-		std::vector<int> solution = AStar(reference, reference.size() - 1);
+		readCAV(argv[1], reference); //retrieves the values in the file given and stores them in 'caverns' using the reference to it
 
-		if (solution.empty()) {
-			std::cout << "- search completed: no path found";
-			return 0;
-		}
-		else {
+		std::vector<int> solution = AStar(reference, reference.size() - 1); //utilizes the A* algorithm to try and find a solution to get to the goal cavern
+
+		if (!solution.empty()) { //if the solution is empty, the algorithm found no path to the goal so don't continue
+
+			//builds the file path to output the solution to
 			std::string path(argv[1]);
 			path.append(".csn");
 
 			std::ofstream file(path);
+
 			if (file.is_open()) {
-				for (std::vector<int>::iterator cavern = solution.begin(); cavern != solution.end(); cavern++)
-					file << *cavern + 1 << ' ';
+				for (std::vector<int>::iterator cavern = solution.begin(); cavern != solution.end(); cavern++) //for every cavern in the solution...
+					file << *cavern + 1 << ' '; //output the ID + 1; a list of size 30 would have cavern IDs 0-29
 				file.close();
 			}
 			else
 				std::cout << "(!) failed to create/open output file";
 		}
+		else
+			std::cout << "(!) search completed: no path found";
 
-		/*for (std::vector<int>::iterator i = solution.begin(); i != solution.end(); i++)
-			std::cout << *i + 1 << ' ';*/
-
-		freeCavern(reference);
+		freeCavern(reference); //after everything is done, deallocate 'caverns'
 	}
 	else
 		std::cout << "(!) invalid number of parameters";
