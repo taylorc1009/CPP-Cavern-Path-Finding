@@ -10,7 +10,6 @@ private:
 public:
 	//Cavern(int _id, int _x, int _y) : id(_id), x(_x), y(_y) {}
 	Cavern(int _x, int _y) : x(_x), y(_y) {}
-	Cavern() = default;
 	//int getID() const { return id; }
 	int getX() const { return x; }
 	int getY() const { return y; }

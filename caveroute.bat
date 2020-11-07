@@ -1,7 +1,7 @@
-
 @echo off
 set STARTTIME=%TIME%
 
+main.exe %1
 rem - insert here the line that runs your program - make sure you pass through the file name appropriately
 rem examples are:
 rem myprogram.exe %1
