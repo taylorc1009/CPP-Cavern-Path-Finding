@@ -26,10 +26,8 @@ void freeCavern(std::vector<Cavern> &caverns) { //deallocates the memory used to
 }
 
 void readCAV(char* name, std::vector<Cavern> &caverns) {
-	//creates the path to the .cav file - C++ cannot concatenate pure strings (name + ".cav") as, to the compiler, they're initially pointers
-	std::string path("cavs/");
-	path.append(name);
-	path.append(".cav");
+	//builds the path to the .cav file - C++ cannot concatenate pure strings (name + ".cav") as, to the compiler, they're initially pointers
+	std::string path(std::string("cavs/") + std::string(name) + std::string(".cav"));
 
 	std::ifstream file(path); //attempt to open the file
 
@@ -174,8 +172,7 @@ int main(int argc, char **argv) {
 		if (!solution.empty()) { //if the solution is empty, the algorithm found no path to the goal so don't continue
 
 			//builds the file path to output the solution to
-			std::string path(argv[1]);
-			path.append(".csn");
+			std::string path(std::string(argv[1]) + std::string(".csn"));
 
 			std::ofstream file(path);
 
