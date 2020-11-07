@@ -6,9 +6,9 @@ This application utilizes the A* search algorithm to find the best possible path
 To use it, simply enter into the command line "caveroute.bat (.cav file name to search, from /cavs)", or compile "navigate.cpp" and run "navigate (file name)".
 
 ### Here's some information I was given about each .cav before I started the project
-* __File__
-	* __Best path__
-	* __Distance of path from start to finish__
+* __(file)__
+	* __(best path)__
+	* __(istance of path from start to finish)__
 
 * generated30-1
 	* 1 7 12 13 14 19 23 29 30
