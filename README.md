@@ -10,7 +10,6 @@ To use it, simple enter into the command line "caveroute.bat (.cav file name to 
 	* __Best path__
 	* __Distance of path from start to finish__
 
-
 * generated30-1
 	* 1 7 12 13 14 19 23 29 30
 	* 56.71
