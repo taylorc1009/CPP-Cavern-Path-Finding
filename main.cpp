@@ -5,22 +5,21 @@
 #include "math.h"
 #include "Cavern.h"
 
-template <typename T>
-struct identity { typedef T type; };
 
-template <typename A, typename B>
+template <typename T> //used to declare paramater types from a non-type parameter in the 'contains' and 'containsKey' methods
+struct identity { typedef T type; }; //allows an instance of a non-type paramater to be created with a type; in our case, type 'T' will become an instance of an 'int'
+
+template <typename A, typename B> //again, declares non-types, but this time for the map; this time, in our case, it will become 'map<int, double>' from 'map<A, B>
 inline bool containsKey(const std::map<A, B> &m, const typename identity<A>::type &val) {
-	return m.find(val) != m.end();
+	return m.find(val) != m.end(); //.find will iterate through the map to find a key and return that node, but if a value isn't found then it will return the end of the map has been reached
 }
 
-template <typename A>
+template <typename A> //this time, it performs the same function as for the map but ith one type, as we will be searching a vector here
 inline bool contains(const std::vector<A> &v, const typename identity<A>::type &val) {
-	return std::find(v.begin(), v.end(), val) != v.end();
+	return std::find(v.begin(), v.end(), val) != v.end(); //here, find will perform the same function as for map with the same results, only this time we need to explicitly tell it what to iterate (as 'vector' has no .find method)
 }
 
 void freeCavern(std::vector<Cavern> &caverns) {
-	/*for (int i = 0; i < caverns.size(); i++)
-		caverns[i].deleteConnections();*/
 	caverns.clear();
 	caverns.swap(std::vector<Cavern>(caverns));
 	delete &caverns;
