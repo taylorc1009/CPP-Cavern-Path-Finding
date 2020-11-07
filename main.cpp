@@ -29,7 +29,8 @@ void freeCavern(std::vector<Cavern> &caverns) {
 }
 
 void readCAV(char* path, std::vector<Cavern> &caverns) {
-	std::string str(path);
+	std::string str("cavs/");
+	str.append(path);
 	str.append(".cav");
 
 	std::ifstream file(str);
