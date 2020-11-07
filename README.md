@@ -3,7 +3,7 @@ An Artificial Intelligence project given by Edinburgh Napier University to find 
 
 This application utilizes the A* search algorithm to find the best possible path through a series of caverns, each of which have their own (x, y) coordinates.
 
-To use it, simple enter into the command line "caveroute.bat (.cav file name to search, in /cavs)", or compile "navigate.cpp" and run "navigate (file name)".
+To use it, simply enter into the command line "caveroute.bat (.cav file name to search, from /cavs)", or compile "navigate.cpp" and run "navigate (file name)".
 
 ### Here's some information I was given about each .cav before I started the project
 * __File__
