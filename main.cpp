@@ -28,12 +28,6 @@ void freeCavern(std::vector<Cavern> &caverns) {
 	delete &caverns;
 }
 
-double EuclidianDistance(Cavern &current, Cavern &goal) {
-	int x = pow((current.getX() + goal.getX()), 2);
-	int y = pow((current.getY() + goal.getY()), 2);
-	return sqrt(x + y);
-}
-
 void readCAV(char* path, std::vector<Cavern> &caverns) {
 	std::string str(path);
 	str.append(".cav");
@@ -78,9 +72,10 @@ void readCAV(char* path, std::vector<Cavern> &caverns) {
 		}
 		file.close();
 		
+		//adds each caverns connections to their connections vector
 		for (i = 0; i < size; i++)
 			for (int j = 0; j < size; j++)
-				if (cons[i][j] == 1)
+				if (cons[i][j] == 1 && i != j) //i != j prevents a cavern from being connected to itself, as this could cause the search to fail
 					caverns[j].addConnection(i);
 
 		for (i = 0; i < size; i++)
@@ -106,6 +101,12 @@ int lowestDistance(std::vector<int> pendingCavs, std::map<int, double> fScore) {
 	return cav;
 }
 
+double EuclidianDistance(Cavern& current, Cavern& goal) {
+	int x = pow((goal.getX() - current.getX()), 2);
+	int y = pow((goal.getY() - current.getY()), 2);
+	return sqrt(x + y);
+}
+
 std::vector<int> reconstructPath(std::map<int, int> &cameFrom, int &currentCavern) {
 	std::vector<int> totalPath;
 	totalPath.push_back(currentCavern);
@@ -116,7 +117,7 @@ std::vector<int> reconstructPath(std::map<int, int> &cameFrom, int &currentCaver
 	return totalPath;
 }
 
-std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
+std::vector<int> AStar(std::vector<Cavern>& caverns, int goal) {
 	std::vector<int> searchedCavs, pendingCavs;
 	std::map<int, int> cameFrom;
 	std::map<int, double> gScore, fScore;
@@ -124,7 +125,7 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 	bool found = false;
 
 	gScore[0] = 0;
-	fScore[0] = estDist;
+	fScore[0] = EuclidianDistance(caverns[0], caverns[goal]);
 	pendingCavs.push_back(0);
 
 	while (pendingCavs.size() > 0) {
@@ -133,7 +134,7 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 		currentCavern = lowestDistance(pendingCavs, fScore);
 
 		//exits the search if a result is found
-		if (currentCavern == goal) {
+		if (currentCavern == caverns.size() - 1) {
 			found = true;
 			break;
 		}
@@ -149,6 +150,7 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 			if (contains(searchedCavs, *connection))
 				continue;
 
+			//
 			double gScoreTentative = gScore[currentCavern] + EuclidianDistance(caverns[currentCavern], caverns[*connection]);
 			if (!contains(pendingCavs, *connection))
 				pendingCavs.push_back(*connection);
@@ -159,10 +161,18 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal, double estDist) {
 			fScore[*connection] = gScore[*connection] + EuclidianDistance(caverns[*connection], caverns[goal]);
 		}
 	}
+
+	/*std::vector<int> v = reconstructPath(cameFrom, currentCavern);
+	int temp;
+	for (std::vector<int>::iterator i = v.begin(); i != v.end(); i++) {
+		if (*i != 0)
+			std::cout << temp + 1 << " -> " << *i + 1 << ": " << EuclidianDistance(caverns[temp], caverns[*i]) << "\n";
+		temp = *i;
+	}*/
+
 	if (found)
 		return reconstructPath(cameFrom, currentCavern);
-	else
-		return std::vector<int>();
+	return std::vector<int>();
 }
 
 int main(int argc, char **argv) {
@@ -182,9 +192,9 @@ int main(int argc, char **argv) {
 
 		std::cout << "\n\n --- A* --- \n\n";*/
 
-		std::vector<int> path = AStar(reference, reference.size() - 1, EuclidianDistance(reference[0], reference[reference.size() - 1]));
+		std::vector<int> path = AStar(reference, reference.size() - 1);
 		for (std::vector<int>::iterator i = path.begin(); i != path.end(); i++)
-			std::cout << *i << ' ';
+			std::cout << *i + 1 << ' ';
 		freeCavern(reference);
 		//std::cout << "done";
 	}
