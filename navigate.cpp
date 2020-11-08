@@ -27,9 +27,12 @@ void freeCavern(std::vector<Cavern> &caverns) { //deallocates the memory used to
 
 void readCAV(char* name, std::vector<Cavern> &caverns) {
 	//builds the path to the .cav file - C++ cannot concatenate pure strings (name + ".cav") as, to the compiler, they're initially pointers
-	std::string path(std::string("cavs/") + std::string(name) + std::string(".cav"));
+	std::string path(std::string(name) + std::string(".cav"));
 
-	std::ifstream file(path); //attempt to open the file
+	std::ifstream file(path); //attempts to open the file
+
+	if (!file.is_open()) //if the file failed to open, checks if it may be in the 'cavs' directory
+		file.open(std::string("cavs/") + path);
 
 	if (file.is_open()) { //continues if the file is open
 		std::string tok;
@@ -167,25 +170,27 @@ int main(int argc, char **argv) {
 
 		readCAV(argv[1], reference); //retrieves the values in the file given and stores them in 'caverns' using the reference to it
 
-		std::vector<int> solution = AStar(reference, reference.size() - 1); //utilizes the A* algorithm to try and find a solution to get to the goal cavern
+		if (!reference.empty()) { //continues as long as the file was opened successfully
+			std::vector<int> solution = AStar(reference, reference.size() - 1); //utilizes the A* algorithm to try and find a solution to get to the goal cavern
 
-		if (!solution.empty()) { //if the solution is empty, the algorithm found no path to the goal so don't continue
+			if (!solution.empty()) { //if the solution is empty, the algorithm found no path to the goal so don't continue
 
-			//builds the file path to output the solution to
-			std::string path(std::string(argv[1]) + std::string(".csn"));
+				//builds the file path to output the solution to
+				std::string path(std::string(argv[1]) + std::string(".csn"));
 
-			std::ofstream file(path);
+				std::ofstream file(path);
 
-			if (file.is_open()) {
-				for (std::vector<int>::iterator cavern = solution.begin(); cavern != solution.end(); cavern++) //for every cavern in the solution...
-					file << *cavern + 1 << ' '; //output the ID + 1; a list of size 30 would have cavern IDs 0-29
-				file.close();
+				if (file.is_open()) {
+					for (std::vector<int>::iterator cavern = solution.begin(); cavern != solution.end(); cavern++) //for every cavern in the solution...
+						file << *cavern + 1 << ' '; //output the ID + 1; a list of size 30 would have cavern IDs 0-29
+					file.close();
+				}
+				else
+					std::cout << "(!) failed to create/open output file";
 			}
 			else
-				std::cout << "(!) failed to create/open output file";
+				std::cout << "(!) search completed: no path found";
 		}
-		else
-			std::cout << "(!) search completed: no path found";
 
 		freeCavern(reference); //after everything is done, deallocate 'caverns'
 	}
