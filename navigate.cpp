@@ -79,7 +79,7 @@ void readCAV(char* name, std::vector<Cavern> &caverns) {
 		delete cons;
 	}
 	else
-		std::cout << "(!) failed to open file: " << path;
+		std::cout << "(!) failed to open file: " << path << "\n";
 }
 
 int shortestDistance(std::vector<int> pendingCavs, std::map<int, double> fScore) { //returns the lowest estimated distance to the goal from each cavern in 'pendingCavs'
@@ -186,15 +186,15 @@ int main(int argc, char **argv) {
 					file.close();
 				}
 				else
-					std::cout << "(!) failed to create/open output file";
+					std::cout << "(!) failed to create/open output file\n";
 			}
 			else
-				std::cout << "(!) search completed: no path found";
+				std::cout << "(!) search completed: no path found\n";
 		}
 
 		freeCavern(reference); //after everything is done, deallocate 'caverns'
 	}
 	else
-		std::cout << "(!) invalid number of parameters";
+		std::cout << "(!) invalid number of parameters\n";
 	return 0;
 }
