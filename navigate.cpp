@@ -120,7 +120,7 @@ std::vector<int> AStar(std::vector<Cavern>& caverns, int goal) {
 	std::vector<int> searchedCavs, pendingCavs; //used to determine which caverns have been searched and which caverns to search next, based on connections
 	std::map<int, int> cameFrom; //signifies where a cavern (int 1) came from (int 2)
 
-	//gScore stores the current lowest distance from the start, to a node
+	//gScore stores the distance from the start to a node, through a path
 	//fScore stores the estimated distance to traverse a path to the goal from the start
 	std::map<int, double> gScore, fScore;
 
