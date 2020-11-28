@@ -25,7 +25,7 @@ void freeCavern(std::vector<Cavern> &caverns) { //deallocates the memory used to
 	delete &caverns; //finally, deletes 'caverns' by reference
 }
 
-void readCAV(char* name, std::vector<Cavern*> *caverns) {
+void readCAV(char* name, std::vector<std::shared_ptr<Cavern>> *caverns) {
 	//builds the path to the .cav file - C++ cannot concatenate pure strings (name + ".cav") as, to the compiler, they're initially pointers
 	std::string path(std::string(name) + std::string(".cav"));
 
@@ -51,7 +51,7 @@ void readCAV(char* name, std::vector<Cavern*> *caverns) {
 			}
 			else if (i > 0 && i <= size * 2) { //if the range of values we're currently iterating is between the first value (size) and the last coordinate - size*2
 				if (isY) { //if the current value is y...
-					(*caverns).push_back(new Cavern(row, temp, stoi(tok))); //store it as y and the temporary value as x...
+					(*caverns).push_back(std::make_shared<Cavern>(Cavern(row, temp, stoi(tok))));//new Cavern(row, temp, stoi(tok))); //store it as y and the temporary value as x...
 					row++;
 				}
 				else
@@ -76,7 +76,7 @@ void readCAV(char* name, std::vector<Cavern*> *caverns) {
 		for (i = 0; i < size; i++)
 			for (int j = 0; j < size; j++)
 				if (cons[i][j] == 1 && i != j) //i != j prevents a cavern from being connected to itself, as this could cause the search to fail
-					(*caverns)[j]->addConnection((*caverns)[i]); //adds the connection by cavern ID 'i' if a connection to the current cavern 'j' is 1 (true)
+					(*caverns)[j].get()->addConnection((*caverns)[i]); //adds the connection by cavern ID 'i' if a connection to the current cavern 'j' is 1 (true)
 
 		//deallocates the 'cons' matrix
 		for (i = 0; i < size; i++)
@@ -87,15 +87,14 @@ void readCAV(char* name, std::vector<Cavern*> *caverns) {
 		std::cout << "(!) failed to open file: " << path << "\n";
 }
 
-void shortestDistance(std::vector<Cavern*> **caverns, Cavern*& cav) { //returns the lowest estimated distance to the goal from each cavern in 'pendingCavs'
+void shortestDistance(std::vector<std::shared_ptr<Cavern>> **caverns, std::shared_ptr<Cavern>& cav) { //returns the lowest estimated distance to the goal from each cavern in 'pendingCavs'
 	double shortest = DBL_MAX;
 	
-	for (std::vector<Cavern*>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++) { //for each unvisited cavern in 'pendingCavs'...
-		if((*cavern)->isPending()) { //determine if we have an 'fScore' for it yet...
-			std::cout << "\npending: " << (*cavern)->getID() << '\n';
-			if ((*cavern)->fScoreGet() < shortest) { //if we do and its distance is lower than the current lowest, update lowest to the current cavern
+	for (std::vector<std::shared_ptr<Cavern>>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++) { //for each unvisited cavern in 'pendingCavs'...
+		if((*cavern).get()->isPending()) { //determine if we have an 'fScore' for it yet...
+			if ((*cavern).get()->fScoreGet() < shortest) { //if we do and its distance is lower than the current lowest, update lowest to the current cavern
 				cav = *cavern;
-				shortest = (*cavern)->fScoreGet();
+				shortest = (*cavern).get()->fScoreGet();
 			}
 		}
 	}
@@ -107,75 +106,56 @@ double EuclidianDistance(Cavern* current, Cavern* goal) {
 	return sqrt(x + y);
 }
 
-std::vector<int> reconstructPath(Cavern &currentCavern) { //rebuilds the final path to be in the order of traversal
+std::vector<int> reconstructPath(std::shared_ptr<Cavern> &currentCavern) { //rebuilds the final path to be in the order of traversal
 	std::vector<int> totalPath;
-	totalPath.push_back(currentCavern.getID()); //add the current cavern, which will be the goal, to the path
+	totalPath.push_back(currentCavern.get()->getID()); //add the current cavern, which will be the goal, to the path
 
-	while (currentCavern.getParent() != nullptr) {
-		currentCavern = *currentCavern.getParent();
-		totalPath.insert(totalPath.begin(), currentCavern.getID());
+	while (currentCavern.get()->getParent() != nullptr) {
+		currentCavern = currentCavern.get()->getParent();
+		totalPath.insert(totalPath.begin(), currentCavern.get()->getID());
 	}
-
-	//while (containsKey(cameFrom, currentCavern)) { //while 'cameFrom' contains any cavern preceeding the goal...
-	//	currentCavern = cameFrom[currentCavern]; //step back through the path to the previous connection to the current cavern...
-	//	totalPath.insert(totalPath.begin(), currentCavern); //then insert the previous connection to the start of the list
-	//}
 
 	return totalPath;
 }
 
-bool allSearched(std::vector<Cavern*> **caverns) {
-	std::cout << "check";
-	for (std::vector<Cavern*>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++)
-		if (!(*cavern)->hasBeenSearched())
+bool allSearched(std::vector<std::shared_ptr<Cavern>> **caverns) {
+	for (std::vector<std::shared_ptr<Cavern>>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++)
+		if (!(*cavern).get()->hasBeenSearched())
 			return false;
 	return true;
 }
 
-std::vector<int> AStar(std::vector<Cavern*> *caverns, int goal) {
-	Cavern* currentCavern; //determines the current subject node
+std::vector<int> AStar(std::vector<std::shared_ptr<Cavern>> *caverns, int goal) {
+	std::shared_ptr<Cavern> currentCavern; //determines the current subject node
 	
 	//initialises the lists of values to start at the first cavern
-	(*caverns)[0]->setPending();
-	(*caverns)[0]->gScoreSet(0);
-	(*caverns)[0]->fScoreSet(EuclidianDistance((*caverns)[0], (*caverns)[goal]));
+	(*caverns)[0].get()->setPending();
+	(*caverns)[0].get()->gScoreSet(0);
+	(*caverns)[0].get()->fScoreSet(EuclidianDistance((*caverns)[0].get(), (*caverns)[goal].get()));
 
 	while (!allSearched(&caverns)) { //keeps searching as long as we have a possible solution
-		std::cout << " short ";
 		shortestDistance(&caverns, currentCavern); //we will search along the path with the currently known shortest distance to the goal
 		
-		if (currentCavern->getID() == goal) { //exits the search returning the result, if it's found
-			//delete currentCavern;
-			return reconstructPath(*currentCavern);
-		}
+		if (currentCavern.get()->getID() == goal) //exits the search returning the result, if it's found
+			return reconstructPath(currentCavern);
 		
-		currentCavern->setSearched();
+		currentCavern.get()->setSearched();
 
-		std::cout << currentCavern->getID() << ',' << currentCavern->getConnections().size() << '\n';
-
-		for (std::vector<Cavern*>::const_iterator connection = currentCavern->getConnections().begin(); connection != currentCavern->getConnections().end(); connection++) { //for each connection of the current Cavern object, in caverns[x].connections
-			std::cout << "?";
-			if ((*connection)->hasBeenSearched()) //skip this check if the connected path has been previously searched
+		for (std::vector<std::shared_ptr<Cavern>>::iterator connection = currentCavern.get()->getConnections().begin(); connection != currentCavern.get()->getConnections().end(); connection++) { //for each connection of the current Cavern object, in caverns[x].connections
+			if ((*connection).get()->hasBeenSearched()) //skip this check if the connected path has been previously searched
 				continue;
 			
-			double gScoreTentative = currentCavern->gScoreGet() + EuclidianDistance(currentCavern, *connection); //creates a temporary distance which stores the distance to a connection of the current cavern from the start
+			double gScoreTentative = currentCavern->gScoreGet() + EuclidianDistance(currentCavern.get(), (*connection).get()); //creates a temporary distance which stores the distance to a connection of the current cavern from the start
 			
 			if (gScoreTentative >= (*connection)->gScoreGet()) //otherwise, check if the distance to the connection through the current path supersedes the pervious shortest path to the connection...
 				continue; //if not, skip recording of this path
 
-			(*connection)->setPending();
-			//if the path is better, or or it hasn't been previously found, its details will be recorded
-			(*connection)->setParent(currentCavern);
-			
-			std::cout << "!" << (*connection)->getID();
-			(*connection)->gScoreSet(gScoreTentative);
-			(*connection)->fScoreSet((*connection)->gScoreGet() + EuclidianDistance(*connection, (*caverns)[goal]));
-			std::cout << '.';
+			(*connection).get()->setPending();
+			(*connection).get()->setParent(currentCavern);
+			(*connection).get()->gScoreSet(gScoreTentative);
+			(*connection).get()->fScoreSet((*connection).get()->gScoreGet() + EuclidianDistance((*connection).get(), (*caverns)[goal].get()));
 		}
-		std::cout << (*caverns)[1]->isPending() << '\n';
 	}
-	std::cout << "none found";
-	//delete currentCavern;
 	return std::vector<int>(); //returns an empty vector to signify an inconclusive search - no path available
 }
 
@@ -228,7 +208,7 @@ std::vector<int> AStar(std::vector<Cavern*> *caverns, int goal) {
 int main(int argc, char **argv) {
 	if (argc == 2) { //determines if we were given a file name
 
-		std::vector<Cavern*> caverns; //declares a vector of type 'Cavern' on the heap
+		std::vector<std::shared_ptr<Cavern>> caverns; //declares a vector of type 'Cavern' on the heap
 		//std::vector<Cavern>& reference = *caverns; //declares a reference to said vector do we can pass a parameter of it by reference
 
 		readCAV(argv[1], &caverns); //retrieves the values in the file given and stores them in 'caverns' using the reference to it
