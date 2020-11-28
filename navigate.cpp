@@ -113,14 +113,15 @@ std::vector<int> reconstructPath(std::shared_ptr<Cavern> &currentCavern) { //reb
 	while (currentCavern.get()->getParent() != nullptr) {
 		currentCavern = currentCavern.get()->getParent();
 		totalPath.insert(totalPath.begin(), currentCavern.get()->getID());
+		std::cout << currentCavern.get()->hasBeenSearched() << ',';
 	}
 
 	return totalPath;
 }
 
-bool allSearched(std::vector<std::shared_ptr<Cavern>> **caverns) {
+bool nonePending(std::vector<std::shared_ptr<Cavern>> **caverns) {
 	for (std::vector<std::shared_ptr<Cavern>>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++)
-		if (!(*cavern).get()->hasBeenSearched())
+		if ((*cavern).get()->isPending())
 			return false;
 	return true;
 }
@@ -133,7 +134,7 @@ std::vector<int> AStar(std::vector<std::shared_ptr<Cavern>> *caverns, int goal) 
 	(*caverns)[0].get()->gScoreSet(0);
 	(*caverns)[0].get()->fScoreSet(EuclidianDistance((*caverns)[0].get(), (*caverns)[goal].get()));
 
-	while (!allSearched(&caverns)) { //keeps searching as long as we have a possible solution
+	while (!nonePending(&caverns)) { //keeps searching as long as we have a possible solution
 		shortestDistance(&caverns, currentCavern); //we will search along the path with the currently known shortest distance to the goal
 		
 		if (currentCavern.get()->getID() == goal) //exits the search returning the result, if it's found
