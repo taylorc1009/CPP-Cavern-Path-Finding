@@ -4,12 +4,12 @@
 class Cavern {
 private:
 	int id, x, y;
-	std::shared_ptr<Cavern> parent;
-	double gScore = DBL_MAX, fScore = DBL_MAX;
+	std::shared_ptr<Cavern> parent; //stores the cavern that has the shortest distance, going TO this one
+	double gScore = DBL_MAX, fScore = DBL_MAX; //maximises the values so that, at first, any path found to this cavern will be recognised as the best; this is so we can definitely give this cavern a pathway to it if we find one and it doesn't already have one
 	bool searched = false, pending = false;
-	std::vector<std::shared_ptr<Cavern>> connections;
+	std::vector<std::shared_ptr<Cavern>> connections; //stores the (child) caverns of this one so we can go to them FROM this
 public:
-	Cavern(int _id, int _x, int _y) : id(_id), x(_x), y(_y) { parent = nullptr; }
+	Cavern(int _id, int _x, int _y) : id(_id), x(_x), y(_y) { parent = nullptr; } //initialise parent as 'nullptr' so we can tell, later, when we've retraced back to the starting cavern (there will be no more parents)
 	Cavern() = default;
 
 	int getID() const { return id; }
