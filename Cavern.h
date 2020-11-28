@@ -3,13 +3,29 @@
 
 class Cavern {
 private:
-	int x;
-	int y;
-	std::vector<int> connections;
+	int id, x, y;
+	Cavern* parent;
+	double gScore = DBL_MAX, fScore = DBL_MAX;
+	bool searched = false, pending = false;
+	std::vector<Cavern*> connections;
 public:
-	Cavern(int _x, int _y) : x(_x), y(_y) {}
+	Cavern(int _id, int _x, int _y) : id(_id), x(_x), y(_y) { parent = nullptr; }
+	Cavern() = default;
+
+	int getID() const { return id; }
 	int getX() const { return x; }
 	int getY() const { return y; }
-	std::vector<int> const &getConnections() const { return connections; }
-	void addConnection(int c) { connections.push_back(c); }
+	Cavern* getParent() { return parent; }
+	double gScoreGet() { return gScore; }
+	double fScoreGet() { return fScore; }
+	bool hasBeenSearched() { return searched; }
+	bool isPending() { return pending; }
+	std::vector<Cavern*> getConnections() { return connections; }
+
+	void setParent(Cavern* p) { parent = p; }
+	void gScoreSet(double s) { gScore = s; }
+	void fScoreSet(double s) { fScore = s; }
+	void setSearched() { pending = false; searched = true; }
+	void setPending() { pending = true; }
+	void addConnection(Cavern* c) { connections.push_back(c); }
 };
