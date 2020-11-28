@@ -145,14 +145,14 @@ int main(int argc, char **argv) {
 	if (argc == 2) { //determines if we were given a file name
 
 		std::vector<std::shared_ptr<Cavern>> caverns; //declares a vector of pointers to Cavern objects;
-		/* a 'shared_ptr' allows us to store multiple copies of the same pointer to the same object - we will need to access the caverns from more than one place, such as the list above and each cavern's list connections
+		/* 'shared_ptr' allows us to store multiple copies of the same pointer to the same object - we will need to access the caverns from more than one place, such as the list above and each cavern's list connections
 		 * we use a shared_ptr because it is unwise to use a vector<Cavern*>, as it quickly becomes difficult to understand ownership of the pointer as we use it through more and more references
 		 * here's a few operators you're going to find and what they're doing:
 		 *	& - a reference, needed if we want to modify a variable from another method
 		 *	* - dereferences the pointer we passed to a method so we can access the data stored in that variable
 		 *	-> - follows a pointer and allows us to modify attributes (or invoke methods) of a class instantly, instead of having to use * (for example, (*foo).bar() could be written as foor->bar(), and (**foo).bar() as (*foo)->bar())
 		 *	** - pointer to a pointer; this is needed to access the memory address in a method that we invoked from inside a method we already passed our object to (for example, using 'caverns' by reference in 'shortestDistance')
-		 *	*& - allows us to modify a pointer by reference
+		 *	*& - allows us to modify a pointer by reference (see 'shortestDistance' - EDIT - removed with the implementation of 'shared_ptr')
 		 */
 
 		readCAV(argv[1], &caverns); //retrieves the values in the file given and stores them in 'caverns' using the reference to it
