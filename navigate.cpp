@@ -67,8 +67,9 @@ void readCAV(char* name, std::vector<std::shared_ptr<Cavern>> *caverns) {
 		std::cout << "(!) failed to open file: " << path << "\n";
 }
 
-void shortestDistance(std::vector<std::shared_ptr<Cavern>> **caverns, std::shared_ptr<Cavern>& current) { //returns the lowest estimated distance to the goal from each cavern that is pending search
+bool shortestDistance(std::vector<std::shared_ptr<Cavern>> **caverns, std::shared_ptr<Cavern>& current) { //returns the lowest estimated distance to the goal from each cavern that is pending search
 	double shortest = DBL_MAX;
+	current = nullptr;
 	
 	for (std::vector<std::shared_ptr<Cavern>>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++) { //for each cavern in 'caverns'...
 		if((*cavern).get()->isPending()) { //determine if the current iteration is pending search...
@@ -78,6 +79,8 @@ void shortestDistance(std::vector<std::shared_ptr<Cavern>> **caverns, std::share
 			}
 		}
 	}
+
+	return current != nullptr; //if 'cavern' is still a 'nullptr', we didn't find any caverns pending search and thus, the search found no path
 }
 
 double EuclidianDistance(Cavern* current, Cavern* goal) {
@@ -98,13 +101,6 @@ std::vector<int> reconstructPath(std::shared_ptr<Cavern> &current) { //rebuilds 
 	return totalPath;
 }
 
-bool nonePending(std::vector<std::shared_ptr<Cavern>> **caverns) { //checks if there are no caverns awaiting search
-	for (std::vector<std::shared_ptr<Cavern>>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++)
-		if ((*cavern).get()->isPending()) //if it finds a single pending cavern, return false
-			return false;
-	return true;
-}
-
 std::vector<int> AStar(std::vector<std::shared_ptr<Cavern>> *caverns, int goal) {
 	std::shared_ptr<Cavern> current; //determines the current subject cavern
 	
@@ -113,9 +109,8 @@ std::vector<int> AStar(std::vector<std::shared_ptr<Cavern>> *caverns, int goal) 
 	(*caverns)[0].get()->gScoreSet(0);
 	(*caverns)[0].get()->fScoreSet(EuclidianDistance((*caverns)[0].get(), (*caverns)[goal].get()));
 
-	while (!nonePending(&caverns)) { //keeps searching as long as we have caverns to search
-		shortestDistance(&caverns, current); //we will search along the path with the currently known shortest distance to the goal
-		
+	while (shortestDistance(&caverns, current)) { //as long as we have a cavern to search (shortest path doesn't set 'current' to nothing), we will search along the path with the currently known shortest distance to the goal
+		 
 		if (current.get()->getID() == goal) //exits the search by returning the result, if it's found
 			return reconstructPath(current);
 		
