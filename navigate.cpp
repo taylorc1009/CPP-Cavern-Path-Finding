@@ -110,8 +110,7 @@ std::vector<int> AStar(std::vector<std::shared_ptr<Cavern>> *caverns, int goal) 
 	(*caverns)[0].get()->fScoreSet(EuclidianDistance((*caverns)[0].get(), (*caverns)[goal].get()));
 
 	while (shortestDistance(&caverns, current)) { //as long as we have a cavern to search (shortest path doesn't set 'current' to nothing), we will search along the path with the currently known shortest distance to the goal
-		 
-		if (current.get()->getID() == goal) //exits the search by returning the result, if it's found
+		if (current.get()->getID() == goal) //exits the search by returning the path result, if it's found
 			return reconstructPath(current);
 		
 		current.get()->setSearched(); //declare that the current cavern has been searched, then search it's connections
@@ -159,7 +158,6 @@ int main(int argc, char **argv) {
 
 				//builds the file path to output the solution to
 				std::string path(std::string(argv[1]) + std::string(".csn"));
-
 				std::ofstream file(path);
 
 				if (file.is_open()) {
