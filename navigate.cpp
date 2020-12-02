@@ -9,17 +9,18 @@ void readCAV(char* name, std::vector<std::shared_ptr<Cavern>> *caverns) {
 	//builds the path to the .cav file - C++ cannot concatenate pure strings (name + ".cav") as, to the compiler, they're initially pointers
 	std::string path(std::string(name) + std::string(".cav"));
 
-	std::ifstream file(path); //attempts to open the file
-
+	std::ifstream file(path); //attempts to open the file...
 	if (!file.is_open()) //if the file failed to open, checks if it may be in the 'cavs' directory
 		file.open(std::string("cavs/") + path);
 
 	if (file.is_open()) { //continues if the file is open
+
 		std::string tok;
 		int i = 0, row = 0, col = 0, size = 0, temp = 0;
 		bool isY = false; //used to determine if the current coordinate we're attempting to store is y
 
 		while (std::getline(file, tok, ',')) { //tokenizes the .cav file by ','
+
 			if (i > (size * 2) && i <= (size * size) + (size * 2)) { //if the range of values we're currently iterating is between the last coordinate and the end of the file - (size*2)+(size*size)
 
 				if (stoi(tok) && row != col) //if the token is 1 then this means there's a connection (as long as 'row != col' as this would signify a cavern is connected to itself, which would cause the search to fail)... 
@@ -62,6 +63,7 @@ bool shortestDistance(std::vector<std::shared_ptr<Cavern>> **caverns, std::share
 	current = nullptr;
 	
 	for (std::vector<std::shared_ptr<Cavern>>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++) { //for each cavern in 'caverns'...
+
 		if((*cavern).get()->isPending()) { //determine if the current iteration is pending search...
 			if ((*cavern).get()->fScoreGet() < shortest) { //if it is and its distance is lower than the current lowest, update the lowest to the current cavern
 				current = *cavern;
