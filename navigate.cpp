@@ -17,12 +17,14 @@ void readCAV(char* name, std::vector<std::shared_ptr<Cavern>> *caverns) {
 	if (file.is_open()) { //continues if the file is open
 		std::string tok;
 		int i = 0, row = 0, col = 0, size = 0, temp = 0;
-		int** cons; //this will be used to store the connections as booleans so we can then later store the connections, in the objects, explicitly as the cavern IDs
 		bool isY = false; //used to determine if the current coordinate we're attempting to store is y
 
 		while (std::getline(file, tok, ',')) { //tokenizes the .cav file by ','
 			if (i > (size * 2) && i <= (size * size) + (size * 2)) { //if the range of values we're currently iterating is between the last coordinate and the end of the file - (size*2)+(size*size)
-				cons[row][col] = stoi(tok);
+
+				if (stoi(tok) && row != col) //if the token is 1 then this means there's a connection (as long as 'row != col' as this would signify a cavern is connected to itself, which would cause the search to fail)... 
+					(*caverns)[col].get()->addConnection((*caverns)[row]); //so add the connection to the respective cavern's connections vector
+
 				col++; //iterates along the row
 				if (col == size) { //if the current row is finished...
 					row++; //move to the next...
@@ -30,12 +32,14 @@ void readCAV(char* name, std::vector<std::shared_ptr<Cavern>> *caverns) {
 				}
 			}
 			else if (i > 0 && i <= size * 2) { //if the range of values we're currently iterating is between the first value (size) and the last coordinate - size*2
+
 				if (isY) { //if the current value is y...
 					(*caverns).push_back(std::make_shared<Cavern>(Cavern(row, temp, stoi(tok)))); //create a new shared pointer to the cavern and store the current value as y and the temporary value as x...
 					row++;
 				}
 				else
 					temp = stoi(tok); //otherwise store x temporarily
+
 				if (i == size * 2)
 					row = 0;
 				else
@@ -44,24 +48,10 @@ void readCAV(char* name, std::vector<std::shared_ptr<Cavern>> *caverns) {
 			else if (i == 0) { //if the current iteration is the first, this will be the amount of caverns present
 				size = stoi(tok);
 				(*caverns).reserve(size); //creates ('reserve's) empty spaces in the list of 'shared_ptr<Cavern>' objects to store x ('size') amount of pointers
-				cons = new int* [size]; //initialises 'cons' as an array based on the amount of caverns and...
-				for (int j = 0; j < size; j++)
-					cons[j] = new int[size]; //stores more arrays in each index of 'cons', essentially creating a matrix (we need to allocate this dynamically in C++, otherwise we must declare the capacity for the compiler)
 			}
 			i++;
 		}
 		file.close();
-
-		//adds each caverns connections to their connections vector
-		for (i = 0; i < size; i++)
-			for (int j = 0; j < size; j++)
-				if (cons[i][j] == 1 && i != j) //i != j prevents a cavern from being connected to itself, as this could cause the search to fail
-					(*caverns)[j].get()->addConnection((*caverns)[i]); //adds the cavern 'i' to the vector of connections if a connection to the current cavern 'j' is 1 (true)
-
-		//deallocates the 'cons' matrix
-		for (i = 0; i < size; i++)
-			delete cons[i];
-		delete cons;
 	}
 	else
 		std::cout << "(!) failed to open file: " << path << "\n";
