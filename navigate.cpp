@@ -35,7 +35,7 @@ void readCAV(char* name, std::vector<std::shared_ptr<Cavern>> *caverns) {
 			else if (i > 0 && i <= size * 2) { //if the range of values we're currently iterating is between the first value (size) and the last coordinate - size*2
 
 				if (isY) { //if the current value is y...
-					(*caverns).push_back(std::make_shared<Cavern>(Cavern(row, temp, stoi(tok)))); //create a new shared pointer to the cavern and store the current value as y and the temporary value as x...
+					(*caverns).push_back(std::make_shared<Cavern>(Cavern(row, temp, stoi(tok)))); //create a new shared pointer to the cavern and store the current value as x and the temporary value as y...
 					row++;
 				}
 				else
@@ -131,20 +131,13 @@ int main(int argc, char **argv) {
 	if (argc == 2) { //determines if we were given a file name
 
 		std::vector<std::shared_ptr<Cavern>> caverns; //declares a vector of pointers to Cavern objects;
-		/* 'shared_ptr' allows us to store multiple copies of the same pointer to the same object - we will need to access the caverns from more than one place, such as the list above and each cavern's list connections
-		 * we use a shared_ptr because it is unwise to use a vector<Cavern*>, as it quickly becomes difficult to understand ownership of the pointer as we use it through more and more references
-		 * here's a few operators you're going to find and what they're doing:
-		 *	& - a reference, needed if we want to modify a variable from another method
-		 *	* - dereferences the pointer we passed to a method so we can access the data stored in that variable
-		 *	-> - follows a pointer and allows us to modify attributes (or invoke methods) of a class instantly, instead of having to use * (for example, (*foo).bar() could be written as foor->bar(), and (**foo).bar() as (*foo)->bar())
-		 *	** - pointer to a pointer; this is needed to access the memory address in a method that we invoked from inside a method we already passed our object to (for example, using 'caverns' by reference in 'shortestDistance')
-		 *	*& - allows us to modify a pointer by reference (see 'shortestDistance' - EDIT - removed with the implementation of 'shared_ptr')
-		 */
+		//'shared_ptr' allows us to store multiple copies of the same pointer to the same object - we will need to access the caverns from more than one place, such as the list above and each cavern's list connections
+		//we use a shared_ptr because it is unwise to use a vector<Cavern*>, as it quickly becomes difficult to understand ownership of the pointer as we use it through more and more references
 
 		readCAV(argv[1], &caverns); //retrieves the values in the file given and stores them in 'caverns' using the reference to it
 
 		if (!caverns.empty()) { //continues as long as the file was opened successfully
-			std::vector<int> solution = AStar(&caverns, caverns.size() - 1); //utilizes the A* algorithm to try and find a solution to get to the goal cavern
+			std::vector<int> solution = AStar(&caverns, caverns.end()->get()->getID()); //utilizes the A* algorithm to try and find a solution to get to the goal cavern
 
 			if (!solution.empty()) { //if the solution is empty, the algorithm found no path to the goal so don't continue
 
