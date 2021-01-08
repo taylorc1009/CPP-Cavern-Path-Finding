@@ -5,7 +5,8 @@ This application utilizes the A* search algorithm to find the best possible path
 
 To use it, simply enter into the command line "caveroute.bat (.cav file name to search, from /cavs)", or compile "navigate.cpp" and run "navigate (file name)".
 
-Final execution time of navigating 5000 caverns (of course, lower PC specs may give a different result):<br/><img align="left" alt="Best time with 5000 caverns" src="visuals/best-5000.jpg"/><br/>
+Final execution time of navigating 5000 caverns (of course, lower PC specs may give a different result):<br/><img align="left" alt="Best time with 5000 caverns" src="visuals/best-5000.jpg"/>
+<br/>
 
 ### Here's information I was given about some of the .cav files, prior to starting the project:
 * __(file)__
