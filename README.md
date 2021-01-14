@@ -8,7 +8,20 @@ To use it, simply enter into the command line "caveroute.bat (.cav file name to 
 Final execution time of navigating 5000 caverns (of course, lower PC specs may give a different result):
 <br/><img align="left" alt="Best time with 5000 caverns" src="visuals/best-5000.jpg"/><br/>
 
-### Here's information I was given about some of the .cav files, prior to starting the project:
+## Here's some information I was given in the coursework specification:
+* .cav files are text files which contain a series of integers, separated by commas.
+<br/>
+* The first integer gives the number of caverns - N.
+<br/>
+* The next N*2 integers give the coordinates of each of the caverns – each value is non-negative.
+<br/>
+* The final N*N integers give the connectivity of the tunnels. 1 means connected, 0 means not connected. Remember that some tunnels are one-way.
+<br/>
+* You must always start at the first cavern in the input file and end at the last cavern in the input file, where a route has been found. The first number will always be 1 and the last number will always be the ID of the last cavern.
+<br/>
+* The solution program can be written in a language of your choice, but it must run on the command line and be accessible by the .bat file.
+
+### Solutions I was given to some of the .cav files, prior to starting the project:
 * __(file)__
 	* __(best path)__
 	* __(distance of path from start to finish)__
