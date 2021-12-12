@@ -1,5 +1,5 @@
 # Cavern Path Finding
-An Artificial Intelligence project given by Edinburgh Napier University to find a pathway through a cavern with x amount paths.
+An Artificial Intelligence project given by Edinburgh Napier University to find a pathway through a cavern with N amount paths.
 
 This application utilizes the A* search algorithm to find the best possible path through a series of caverns, each of which have their own (x, y) coordinates.
 
@@ -19,7 +19,7 @@ Final execution time of navigating 5000 caverns (of course, lower PC specs may g
 * You must always start at the first cavern in the input file and end at the last cavern in the input file, where a route has been found. The first number will always be 1 and the last number will always be the ID of the last cavern.
 * The solution program can be written in a language of your choice, but it must run on the command line and be accessible by the .bat file.
 
-### Solutions I was given to some of the .cav files, prior to starting the project:
+### Solutions I was given to some of the .cav files prior to starting the project:
 * __(file)__
 	* __(best path)__
 	* __(distance of path from start to finish)__
