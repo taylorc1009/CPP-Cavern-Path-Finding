@@ -6,7 +6,6 @@ bool shortestDistance(std::vector<std::shared_ptr<Cavern>> **caverns, std::share
 	current = nullptr;
 	
 	for (std::vector<std::shared_ptr<Cavern>>::iterator cavern = (*caverns)->begin(); cavern != (*caverns)->end(); cavern++) { //for each cavern in 'caverns'...
-
 		if((*cavern).get()->isPending()) { //determine if the current iteration is pending search...
 			if ((*cavern).get()->fScoreGet() < shortest) { //if it is and its distance is lower than the current lowest, update the lowest to the current cavern
 				current = *cavern;
@@ -67,12 +66,12 @@ std::vector<int> AStar(std::vector<std::shared_ptr<Cavern>> *caverns, int goal) 
 			(*connection).get()->fScoreSet((*connection).get()->gScoreGet() + EuclidianDistance((*connection).get(), (*caverns)[goal].get()));
 		}
 	}
+
 	return std::vector<int>(); //returns an empty vector to signify an inconclusive search - no path available
 }
 
 int main(int argc, char **argv) {
 	if (argc == 2) { //determines if we were given a file name
-
 		std::vector<std::shared_ptr<Cavern>> caverns; //declares a vector of pointers to Cavern objects;
 		//'shared_ptr' allows us to store multiple copies of the same pointer to the same object - we will need to access the caverns from more than one place, such as the list above and each cavern's list connections
 		//we use a shared_ptr because it is unwise to use a vector<Cavern*>, as it quickly becomes difficult to understand ownership of the pointer as we use it through more and more references
@@ -83,7 +82,6 @@ int main(int argc, char **argv) {
 			std::vector<int> solution = AStar(&caverns, caverns.end()->get()->getID()); //utilizes the A* algorithm to try and find a solution to get to the goal cavern
 
 			if (!solution.empty()) { //if the solution is empty, the algorithm found no path to the goal so don't continue
-
 				//builds the file path to output the solution to
 				std::string path(std::string(argv[1]) + std::string(".csn"));
 				std::ofstream file(path);
