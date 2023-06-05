@@ -28,4 +28,8 @@ public:
 	void setSearched() { pending = false; searched = true; }
 	void setPending() { pending = true; }
 	void addConnection(std::shared_ptr<Cavern>& c) { connections.push_back(c); }
+
+	bool operator==(const Cavern& __restrict rhs) {
+		return this->getID() == rhs.getID();
+	}
 };
