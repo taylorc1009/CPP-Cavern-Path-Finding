@@ -19,7 +19,7 @@ Final execution time, in HH:mm:ss.ms, of navigating 5000 caverns (of course, low
 * You must always start at the first cavern in the input file and end at the last cavern in the input file, where a route has been found. The first number will always be 1 and the last number will always be the ID of the last cavern.
 * The solution program can be written in a language of your choice, but it must run on the command line and be accessible by the .bat file.
 
-### Solutions I was given to some of the .cav files prior to starting the project:
+### Best-known solutions I was given to some of the .cav files prior to starting the project:
 * __(file)__
 	* __(best path)__
 	* __(distance of path from start to finish)__
